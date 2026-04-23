@@ -75,6 +75,7 @@ jobs:
 
       - name: Run pytest with coverage
         run: |
+          export PYTHONPATH=$PYTHONPATH:.
           pytest tests --cov=api --cov-report=xml
 
       - name: Upload coverage report
