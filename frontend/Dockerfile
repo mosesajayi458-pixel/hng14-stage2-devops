@@ -17,6 +17,9 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Upgrade alpine packages to fix security vulnerabilities (openssl)
+RUN apk update && apk upgrade --no-cache
+
 # Copy app from builder
 COPY --from=builder /app /app
 
