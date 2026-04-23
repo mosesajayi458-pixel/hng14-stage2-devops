@@ -218,15 +218,15 @@ jobs:
         run: |
           docker compose ps
 
-      - name: Submit job through frontend and wait for completion
+      - name: Submit job and wait for completion
         run: |
-          FRONTEND_URL="http://localhost:3000"
+          API_URL="http://localhost:8000"
 
-          JOB_ID=$(curl -s -X POST $FRONTEND_URL/submit | jq -r '.job_id')
+          JOB_ID=$(curl -s -X POST $API_URL/jobs | jq -r '.job_id')
           echo "Job ID: $JOB_ID"
 
           for i in {1..30}; do
-            STATUS=$(curl -s $FRONTEND_URL/status/$JOB_ID | jq -r '.status')
+            STATUS=$(curl -s $API_URL/jobs/$JOB_ID | jq -r '.status')
             echo "Status: $STATUS"
 
             if [ "$STATUS" = "completed" ]; then
