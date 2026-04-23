@@ -44,4 +44,3 @@ def get_job(job_id: str):
         "job_id": job_id,
         "status": status.decode() if isinstance(status, bytes) else status,
     }
-    
