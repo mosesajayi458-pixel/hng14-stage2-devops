@@ -1,12 +1,12 @@
-from dotenv import load_dotenv
 import os
+import uuid
+
+import redis
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
 
 # Load .env from project root
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
-
-from fastapi import FastAPI, HTTPException
-import redis
-import uuid
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 app = FastAPI()
 
@@ -42,5 +42,6 @@ def get_job(job_id: str):
 
     return {
         "job_id": job_id,
-        "status": status.decode() if isinstance(status, bytes) else status
+        "status": status.decode() if isinstance(status, bytes) else status,
     }
+    
