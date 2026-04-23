@@ -143,8 +143,8 @@ jobs:
           docker build -t localhost:5000/worker:latest ./worker
           docker build -t localhost:5000/frontend:latest ./frontend
 
-      - name: Scan API image with Trivy
-        uses: aquasecurity/trivy-action@v0.28.1
+      - name: Scan API image
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: localhost:5000/api:latest
           format: sarif
@@ -152,8 +152,8 @@ jobs:
           severity: CRITICAL
           exit-code: 1
 
-      - name: Scan Worker image with Trivy
-        uses: aquasecurity/trivy-action@v0.28.1
+      - name: Scan Worker image
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: localhost:5000/worker:latest
           format: sarif
@@ -161,8 +161,8 @@ jobs:
           severity: CRITICAL
           exit-code: 1
 
-      - name: Scan Frontend image with Trivy
-        uses: aquasecurity/trivy-action@v0.28.1
+      - name: Scan Frontend image
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: localhost:5000/frontend:latest
           format: sarif
