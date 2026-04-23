@@ -66,7 +66,7 @@ Node.js 18+
 Step 1: Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/hng14-stage2-devops.git
+git clone https://github.com/mosesajayi458-pixel/hng14-stage2-devops.git
 cd hng14-stage2-devops
 ````
 
