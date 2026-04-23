@@ -253,15 +253,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Start old version (simulate production)
+      - name: Build old API image (simulate currently running production)
         run: |
-          docker compose up -d --build
+          docker build -t api:old ./api
+
+      - name: Run old API container
+        run: |
+          docker run -d --name api_old -p 8000:8000 api:old
+
+      - name: Wait for old API to be healthy
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:8000/health | grep "ok"; then
+              echo "Old API is healthy"
+              exit 0
+            fi
+            echo "Waiting for old API..."
+            sleep 2
+          done
+
+          echo "Old API failed to start"
+          docker logs api_old
+          exit 1
 
       - name: Build new API image
         run: |
           docker build -t api:new ./api
 
-      - name: Run new API container
+      - name: Run new API container on different port
         run: |
           docker run -d --name api_new -p 8001:8000 api:new
 
@@ -276,26 +295,41 @@ jobs:
             sleep 2
           done
 
-          echo "New API failed healthcheck. Keeping old container running."
+          echo "New API failed healthcheck. Keeping old API running."
           docker logs api_new
           exit 1
 
-      - name: Stop old API container and replace
+      - name: Stop old API and promote new API
         run: |
-          docker compose stop api
-          docker compose rm -f api
+          docker stop api_old
+          docker rm api_old
 
-      - name: Start updated API container
-        run: |
+          docker stop api_new
+          docker rm api_new
+
           docker run -d --name api -p 8000:8000 api:new
 
-      - name: Verify API is running
+      - name: Confirm new API is live
         run: |
-          curl -s http://localhost:8000/health
+          for i in {1..30}; do
+            if curl -s http://localhost:8000/health | grep "ok"; then
+              echo "Deployment successful"
+              exit 0
+            fi
+            echo "Waiting for promoted API..."
+            sleep 2
+          done
+
+          echo "Deployment failed"
+          docker logs api
+          exit 1
 
       - name: Cleanup
         if: always()
         run: |
-          docker compose down -v || true
+          docker stop api || true
+          docker rm api || true
+          docker stop api_old || true
+          docker rm api_old || true
           docker stop api_new || true
           docker rm api_new || true
