@@ -244,3 +244,58 @@ jobs:
         if: always()
         run: |
           docker compose down -v
+  deploy:
+    runs-on: ubuntu-latest
+    needs: integration_test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start old version (simulate production)
+        run: |
+          docker compose up -d --build
+
+      - name: Build new API image
+        run: |
+          docker build -t api:new ./api
+
+      - name: Run new API container
+        run: |
+          docker run -d --name api_new -p 8001:8000 api:new
+
+      - name: Wait for new API healthcheck (60 seconds max)
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:8001/health | grep "ok"; then
+              echo "New API is healthy"
+              exit 0
+            fi
+            echo "Waiting for new API..."
+            sleep 2
+          done
+
+          echo "New API failed healthcheck. Keeping old container running."
+          docker logs api_new
+          exit 1
+
+      - name: Stop old API container and replace
+        run: |
+          docker compose stop api
+          docker compose rm -f api
+
+      - name: Start updated API container
+        run: |
+          docker run -d --name api -p 8000:8000 api:new
+
+      - name: Verify API is running
+        run: |
+          curl -s http://localhost:8000/health
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down -v || true
+          docker stop api_new || true
+          docker rm api_new || true
