@@ -1,11 +1,11 @@
-from dotenv import load_dotenv
 import os
-
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+import signal
+import time
 
 import redis
-import time
-import signal
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 REDIS_HOST = os.getenv("REDIS_HOST", "redis")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
@@ -15,9 +15,11 @@ r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 running = True
 
+
 def shutdown_handler(signum, frame):
     global running
     running = False
+
 
 signal.signal(signal.SIGTERM, shutdown_handler)
 signal.signal(signal.SIGINT, shutdown_handler)
