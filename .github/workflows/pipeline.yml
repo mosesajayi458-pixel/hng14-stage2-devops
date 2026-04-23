@@ -143,32 +143,56 @@ jobs:
           docker build -t localhost:5000/worker:latest ./worker
           docker build -t localhost:5000/frontend:latest ./frontend
 
-      - name: Scan API image
+      - name: Scan API image (print output)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          image-ref: localhost:5000/api:latest
+          format: table
+          severity: CRITICAL
+          exit-code: 1
+
+      - name: Scan API image (SARIF)
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: localhost:5000/api:latest
           format: sarif
           output: trivy-api.sarif
           severity: CRITICAL
+          exit-code: 0
+
+      - name: Scan Worker image (print output)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          image-ref: localhost:5000/worker:latest
+          format: table
+          severity: CRITICAL
           exit-code: 1
 
-      - name: Scan Worker image
+      - name: Scan Worker image (SARIF)
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: localhost:5000/worker:latest
           format: sarif
           output: trivy-worker.sarif
           severity: CRITICAL
+          exit-code: 0
+
+      - name: Scan Frontend image (print output)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          image-ref: localhost:5000/frontend:latest
+          format: table
+          severity: CRITICAL
           exit-code: 1
 
-      - name: Scan Frontend image
+      - name: Scan Frontend image (SARIF)
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: localhost:5000/frontend:latest
           format: sarif
           output: trivy-frontend.sarif
           severity: CRITICAL
-          exit-code: 1
+          exit-code: 0
 
       - name: Upload SARIF results
         uses: actions/upload-artifact@v4
